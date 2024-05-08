@@ -40,5 +40,5 @@ function set_array_element {
 }
 function render_array {
     clear
-    printf "$(echo $1 | sed -e 's/,/\|/g' -e 's/;/\\n/g')"
+    printf "$(echo $1 | sed -e 's/,//g' -e 's/;/\\n/g')\n"
 }
