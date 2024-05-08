@@ -1,0 +1,10 @@
+#+title: NetTacToe
+#+author: tusharhero
+
+This is a multiplayer Tic Tac Toe game which uses netcat for
+networking and is written in Bash.
+
+* Goals
+** Multiplayer
+Multiplayer is the focus here. Particularly the users should be able
+to join a match using a room number (literally the port, Ig).
