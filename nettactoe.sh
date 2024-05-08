@@ -27,3 +27,14 @@ function get_array_element {
     local element=$(echo $row | cut -d"," -f $x -)
     echo $element
 }
+
+function set_array_element {
+    local array=$1
+    local y=$2
+    local x=$3
+    local newvalue=$4
+    local row=$(echo $array | cut -d";" -f $y -)
+    row=$(echo "$row" | awk -F "," -v newvalue="$newvalue" -v x="$x" 'BEGIN{FS=OFS=","} {$x=newvalue; print}' )
+    array=$(echo "$array" | awk -F ";" -v newvalue="$row" -v y="$y" 'BEGIN{FS=OFS=";"} {$y=newvalue; print}')
+    echo $array
+}
