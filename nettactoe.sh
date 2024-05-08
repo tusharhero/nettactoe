@@ -38,3 +38,7 @@ function set_array_element {
     array=$(echo "$array" | awk -F ";" -v newvalue="$row" -v y="$y" 'BEGIN{FS=OFS=";"} {$y=newvalue; print}')
     echo $array
 }
+function render_array {
+    clear
+    printf "$(echo $1 | sed -e 's/,/\|/g' -e 's/;/\\n/g')"
+}
