@@ -65,3 +65,15 @@ function check_game {
 		[ $(get_array_element $array 2 2) = $(get_array_element $array 1 3) ]; } && \
 		{ echo $(get_array_element $array 2 2); return 0; }; }
 }
+
+game="◼️️,◼️,◼️;◼️,◼️,◼️;◼️,◼️,◼️"
+no_moves=0
+while true; do
+    render_array $game
+    result=$(check_game $game)
+    [ -z $result ] || echo $result won!
+    read -p "Enter move: " move
+    player=$([ "$(( $no_moves % 2))" = 0 ] && echo "⭕" || echo "❌")
+    game=$(set_array_element $game $(echo $move | cut -d"," -f 1 -) $(echo $move | cut -d"," -f 2 -) $player)
+    no_moves=$((no_moves+1))
+done
