@@ -19,6 +19,21 @@ function clear {
     printf '\033c'
 }
 
+function max {
+    echo $(( $1 > $2 ? $1 : $2 ))
+}
+
+function min {
+    echo $(( $1 < $2 ? $1 : $2 ))
+}
+
+function clamp {
+    local value=$1
+    local min_value=$2
+    local max_value=$3
+    echo $(min $( max $value $min_value ) $max_value)
+}
+
 function get_array_element {
     local array=$1
     local y=$2
@@ -71,7 +86,9 @@ function make_move {
     local player=$2
     local move=$3
     local y=$(echo $move | cut -d"," -f 1 -)
+    y=$(clamp $y 1 3)
     local x=$(echo $move | cut -d"," -f 2 -)
+    x=$(clamp $x 1 3)
     echo $(set_array_element $game $y $x $player)
 }
 
