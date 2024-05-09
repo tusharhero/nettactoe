@@ -59,9 +59,9 @@ function check_game {
 	    { echo $(get_array_element $array 1 $x); return 0; } }
     done
     [ $(get_array_element $array 2 2) = "◼️" ] || \
-    { [ $(get_array_element $array 1 1) = $(get_array_element $array 2 2) ] && \
-	[ $(get_array_element $array 2 2) = $(get_array_element $array 3 3) ] || \
-	    [ $(get_array_element $array 3 1) = $(get_array_element $array 2 2) ] && \
-		[ $(get_array_element $array 2 2) = $(get_array_element $array 1 3) ] && \
-		{ echo $(get_array_element $array 2 2); return 0; } }
+    { { [ $(get_array_element $array 1 1) = $(get_array_element $array 2 2) ] && \
+	[ $(get_array_element $array 2 2) = $(get_array_element $array 3 3) ]; } || \
+	   { [ $(get_array_element $array 3 1) = $(get_array_element $array 2 2) ] && \
+		[ $(get_array_element $array 2 2) = $(get_array_element $array 1 3) ]; } && \
+		{ echo $(get_array_element $array 2 2); return 0; }; }
 }
