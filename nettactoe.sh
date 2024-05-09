@@ -66,6 +66,15 @@ function check_game {
 		{ echo $(get_array_element $array 2 2); return 0; }; }
 }
 
+function make_move {
+    local game=$1
+    local player=$2
+    local move=$3
+    local y=$(echo $move | cut -d"," -f 1 -)
+    local x=$(echo $move | cut -d"," -f 2 -)
+    echo $(set_array_element $game $y $x $player)
+}
+
 game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
 no_moves=0
 while true; do
@@ -74,6 +83,6 @@ while true; do
    [ -z $result ] || echo $result won!
     read -p "Enter move: " move
     player=$([ "$(( $no_moves % 2))" = 0 ] && echo "⭕" || echo "❌")
-    game=$(set_array_element $game $(echo $move | cut -d"," -f 1 -) $(echo $move | cut -d"," -f 2 -) $player)
+    game=$(make_move $game $player $move);
     no_moves=$((no_moves+1))
 done
