@@ -47,18 +47,18 @@ function render_array {
 function check_game {
     local array=$1
     for y in {1..3}; do
-	[ $(get_array_element $array $y 1) = "◼️" ] || \
+	[ $(get_array_element $array $y 1) = "⬛️" ] || \
 	{ [ $(get_array_element $array $y 1) = $(get_array_element $array $y 2) ] && \
 	    [ $(get_array_element $array $y 2) = $(get_array_element $array $y 3) ] && \
 	    { echo $(get_array_element $array $y 1); return 0; } }
     done
     for x in {1..3}; do
-	[ $(get_array_element $array 1 $x) = "◼️" ] || \
+	[ $(get_array_element $array 1 $x) = "⬛️" ] || \
 	{ [ $(get_array_element $array 1 $x) = $(get_array_element $array 2 $x) ] && \
 	    [ $(get_array_element $array 2 $x) = $(get_array_element $array 3 $x) ] && \
 	    { echo $(get_array_element $array 1 $x); return 0; } }
     done
-    [ $(get_array_element $array 2 2) = "◼️" ] || \
+    [ $(get_array_element $array 2 2) = "⬛️" ] || \
     { { [ $(get_array_element $array 1 1) = $(get_array_element $array 2 2) ] && \
 	[ $(get_array_element $array 2 2) = $(get_array_element $array 3 3) ]; } || \
 	   { [ $(get_array_element $array 3 1) = $(get_array_element $array 2 2) ] && \
@@ -66,12 +66,12 @@ function check_game {
 		{ echo $(get_array_element $array 2 2); return 0; }; }
 }
 
-game="◼️️,◼️,◼️;◼️,◼️,◼️;◼️,◼️,◼️"
+game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
 no_moves=0
 while true; do
     render_array $game
     result=$(check_game $game)
-    [ -z $result ] || echo $result won!
+   [ -z $result ] || echo $result won!
     read -p "Enter move: " move
     player=$([ "$(( $no_moves % 2))" = 0 ] && echo "⭕" || echo "❌")
     game=$(set_array_element $game $(echo $move | cut -d"," -f 1 -) $(echo $move | cut -d"," -f 2 -) $player)
