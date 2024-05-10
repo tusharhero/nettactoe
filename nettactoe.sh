@@ -96,11 +96,17 @@ function make_move {
     local game=$1
     local player=$2
     local move=$3
-    local y=$(echo $move | cut -d"," -f 1 -)
+    local y=$(printf $move | cut -d"," -f 1 -)
     y=$(clamp $y 1 3)
-    local x=$(echo $move | cut -d"," -f 2 -)
+    local x=$(printf $move | cut -d"," -f 2 -)
     x=$(clamp $x 1 3)
-    echo $(set_array_element $game $y $x $player)
+    block="$(get_array_element $game $y $x)"
+    if [ "$block" == "⭕" ] || [ "$block" == "❌" ]; then
+      read -p "That block is preoccupied, please enter new move: " move
+      make_move $game $player $move
+    else
+      echo $(set_array_element $game $y $x $player);
+    fi
 }
 
 game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
