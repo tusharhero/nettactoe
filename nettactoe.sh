@@ -66,7 +66,6 @@ function set_array_element {
 }
 
 function render_array {
-    clear
     printf "$(echo $1 | sed -e 's/,//g' -e 's/;/\\n/g')\n"
 }
 
@@ -109,14 +108,15 @@ function make_move {
     fi
 }
 
-game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
+new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
+game=$new_game
 no_moves=0
 while true; do
     render_array $game
-    result=$(check_game $game)
-    [ -z $result ] || echo $result won!
-    read -p "Enter move: " move
     player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
+    read -p "$player Enter move: " move
     game=$(make_move $game $player $move);
     no_moves=$((no_moves+1))
+    result=$(check_game $game)
+    [ -z $result ] || { clear; echo $result won! restarting game!; game=$new_game; no_moves=0; }
 done
