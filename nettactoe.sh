@@ -120,6 +120,7 @@ printf "
 printf "Copyright (C) 2024 tusharhero\n\n"
 printf "Hit return to start\n"
 read
+clear
 
 new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
 game=$new_game
