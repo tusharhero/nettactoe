@@ -89,6 +89,8 @@ function check_game {
 	   { [ "$(get_array_element $array 3 1)" == "$(get_array_element $array 2 2)" ] && \
 		[ "$(get_array_element $array 2 2)" == "$(get_array_element $array 1 3)" ]; } && \
 		{ printf "$(get_array_element $array 2 2)"; return 0; }; }
+
+    [ $(echo $array | sed 's/[^⬛]//g' | awk '{ print length }') == 0 ] && { printf 'draw'; return 0;}
 }
 
 function make_move {
