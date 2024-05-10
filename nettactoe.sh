@@ -90,7 +90,7 @@ function check_game {
 		[ "$(get_array_element $array 2 2)" == "$(get_array_element $array 1 3)" ]; } && \
 		{ printf "$(get_array_element $array 2 2)"; return 0; }; }
 
-    [ $(printf $array | sed 's/[^⬛]//g' | wc --chars) == 0 ] && { printf 'draw'; return 0;}
+    [ $(printf $array | sed 's/[^⬛]//g' | wc --chars) == 0 ] && { printf 'no one'; return 0;}
 }
 
 function make_move {
