@@ -97,7 +97,7 @@ no_moves=0
 while true; do
     render_array $game
     result=$(check_game $game)
-   [ -z $result ] || echo $result won!
+    [ -z $result ] || echo $result won!
     read -p "Enter move: " move
     player=$([ "$(( $no_moves % 2))" = 0 ] && echo "⭕" || echo "❌")
     game=$(make_move $game $player $move);
