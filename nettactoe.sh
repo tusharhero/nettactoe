@@ -36,15 +36,22 @@ function clamp {
 
     echo "$returnValue"
 }
+
+function get_row {
+  echo $1 | cut -d";" -f $2 -
+}
+
+function get_cell {
+  echo $1 | cut -d"," -f $2 -
 }
 
 function get_array_element {
     local array=$1
     local y=$2
     local x=$3
-    local row=$(echo $array | cut -d";" -f $y -)
-    local element=$(echo $row | cut -d"," -f $x -)
-    echo $element
+    local row=$(get_row "$array" "$y")
+    local element=$(get_cell "$row" "$x")
+    echo "$element"
 }
 
 function set_array_element {
@@ -52,9 +59,9 @@ function set_array_element {
     local y=$2
     local x=$3
     local newvalue=$4
-    local row=$(echo $array | cut -d";" -f $y -)
-    row=$(echo "$row" | awk -F "," -v newvalue="$newvalue" -v x="$x" 'BEGIN{FS=OFS=","} {$x=newvalue; print}' )
-    array=$(echo "$array" | awk -F ";" -v newvalue="$row" -v y="$y" 'BEGIN{FS=OFS=";"} {$y=newvalue; print}')
+    local row=$(get_row "$array" "$y")
+    row=$(printf "$row" | awk -F "," -v newvalue="$newvalue" -v x="$x" 'BEGIN{FS=OFS=","} {$x=newvalue; print}' )
+    array=$(printf "$array" | awk -F ";" -v newvalue="$row" -v y="$y" 'BEGIN{FS=OFS=";"} {$y=newvalue; print}')
     echo $array
 }
 
