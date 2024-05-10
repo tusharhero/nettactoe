@@ -1,6 +1,14 @@
 #+title: NetTacToe
 #+author: tusharhero
 
+#+begin_center
+███    ██ ███████ ████████ ████████  █████   ██████ ████████  ██████  ███████ 
+████   ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
+██ ██  ██ █████      ██       ██    ███████ ██         ██    ██    ██ █████   
+██  ██ ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
+██   ████ ███████    ██       ██    ██   ██  ██████    ██     ██████  ███████ 
+#+end_center
+
 This is a multiplayer Tic Tac Toe game which uses netcat for
 networking and is written in Bash.
 
