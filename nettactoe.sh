@@ -120,5 +120,10 @@ while true; do
     game=$(make_move $game $player $move);
     no_moves=$((no_moves+1))
     result=$(check_game $game)
-    [ -z $result ] || { clear; echo $result won! restarting game!; game=$new_game; no_moves=0; }
+    [ -z $result ] || { clear; echo $result won! ;
+			read -p "do you want to play again?[Y/N]" restart;
+			[ $restart == 'Y' ] && { echo restarting game!;
+						 game=$new_game;
+						 no_moves=0; } || break
+    }
 done
