@@ -20,18 +20,22 @@ function clear {
 }
 
 function max {
-    echo $(( $1 > $2 ? $1 : $2 ))
+  [ $1 -gt $2 ] && echo $1 || echo $2
 }
 
 function min {
-    echo $(( $1 < $2 ? $1 : $2 ))
+  [ $1 -lt $2 ] && echo $1 || echo $2
 }
 
 function clamp {
     local value=$1
     local min_value=$2
     local max_value=$3
-    echo $(min $( max $value $min_value ) $max_value)
+    local firstValue=$(max $value $min_value)
+    local returnValue=$(min $firstValue $max_value)
+
+    echo "$returnValue"
+}
 }
 
 function get_array_element {
