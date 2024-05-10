@@ -73,23 +73,23 @@ function render_array {
 function check_game {
     local array=$1
     for y in {1..3}; do
-	[ $(get_array_element $array $y 1) = "⬛️" ] || \
-	{ [ $(get_array_element $array $y 1) = $(get_array_element $array $y 2) ] && \
-	    [ $(get_array_element $array $y 2) = $(get_array_element $array $y 3) ] && \
-	    { echo $(get_array_element $array $y 1); return 0; } }
+	[ "$(get_array_element $array $y 1)" == "⬛️" ] || \
+	{ [ "$(get_array_element $array $y 1)" == "$(get_array_element $array $y 2)" ] && \
+	    [ "$(get_array_element $array $y 2)" == "$(get_array_element $array $y 3)" ] && \
+	    { printf "$(get_array_element $array $y 1)"; return 0; } }
     done
     for x in {1..3}; do
-	[ $(get_array_element $array 1 $x) = "⬛️" ] || \
-	{ [ $(get_array_element $array 1 $x) = $(get_array_element $array 2 $x) ] && \
-	    [ $(get_array_element $array 2 $x) = $(get_array_element $array 3 $x) ] && \
-	    { echo $(get_array_element $array 1 $x); return 0; } }
+	[ "$(get_array_element $array 1 $x)" == "⬛️" ] || \
+	{ [ "$(get_array_element $array 1 $x)" == "$(get_array_element $array 2 $x)" ] && \
+	    [ "$(get_array_element $array 2 $x)" == "$(get_array_element $array 3 $x)" ] && \
+	    { printf "$(get_array_element $array 1 $x)"; return 0; } }
     done
-    [ $(get_array_element $array 2 2) = "⬛️" ] || \
-    { { [ $(get_array_element $array 1 1) = $(get_array_element $array 2 2) ] && \
-	[ $(get_array_element $array 2 2) = $(get_array_element $array 3 3) ]; } || \
-	   { [ $(get_array_element $array 3 1) = $(get_array_element $array 2 2) ] && \
-		[ $(get_array_element $array 2 2) = $(get_array_element $array 1 3) ]; } && \
-		{ echo $(get_array_element $array 2 2); return 0; }; }
+    [ "$(get_array_element $array 2 2)" == "⬛️" ] || \
+    { { [ "$(get_array_element $array 1 1)" == "$(get_array_element $array 2 2)" ] && \
+	[ "$(get_array_element $array 2 2)" == "$(get_array_element $array 3 3)" ]; } || \
+	   { [ "$(get_array_element $array 3 1)" == "$(get_array_element $array 2 2)" ] && \
+		[ "$(get_array_element $array 2 2)" == "$(get_array_element $array 1 3)" ]; } && \
+		{ printf "$(get_array_element $array 2 2)"; return 0; }; }
 }
 
 function make_move {
@@ -110,7 +110,7 @@ while true; do
     result=$(check_game $game)
     [ -z $result ] || echo $result won!
     read -p "Enter move: " move
-    player=$([ "$(( $no_moves % 2))" = 0 ] && echo "⭕" || echo "❌")
+    player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
     game=$(make_move $game $player $move);
     no_moves=$((no_moves+1))
 done
