@@ -110,18 +110,8 @@ function make_move {
     fi
 }
 
-printf "
-███    ██ ███████ ████████ ████████  █████   ██████ ████████  ██████  ███████ 
-████   ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
-██ ██  ██ █████      ██       ██    ███████ ██         ██    ██    ██ █████   
-██  ██ ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
-██   ████ ███████    ██       ██    ██   ██  ██████    ██     ██████  ███████ 
-"                                                                              
-printf "Copyright (C) 2024 tusharhero\n\n"
-printf "Hit return to start\n"
-read
-clear
 
+function server {
 new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
 game=$new_game
 no_moves=0
@@ -139,3 +129,24 @@ while true; do
 						 no_moves=0; } || break
     }
 done
+}
+
+printf "
+███    ██ ███████ ████████ ████████  █████   ██████ ████████  ██████  ███████ 
+████   ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
+██ ██  ██ █████      ██       ██    ███████ ██         ██    ██    ██ █████   
+██  ██ ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
+██   ████ ███████    ██       ██    ██   ██  ██████    ██     ██████  ███████ 
+"                                                                              
+printf "Copyright (C) 2024 tusharhero\n\n"
+printf "Hit return to start\n"
+read
+clear
+
+read -p "Do you want to connect to an existing server[Y/N]:" mode
+
+case "$mode" in
+    server ) server ;;
+    client ) echo "Client has not been implemented." ;;
+    * ) echo "I don't know what mode you are talking about." ;;
+esac
