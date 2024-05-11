@@ -112,23 +112,23 @@ function make_move {
 
 
 function server {
-new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
-game=$new_game
-no_moves=0
-while true; do
-    render_array $game
-    player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
-    read -p "$player Enter move: " move
-    game=$(make_move $game $player $move);
-    no_moves=$((no_moves+1))
-    result=$(check_game $game)
-    [ -z $result ] || { clear; render_array $game ; echo $result won! ;
-			read -p "do you want to play again?[Y/N]" restart;
-			[ $restart == 'Y' ] && { echo restarting game!;
-						 game=$new_game;
-						 no_moves=0; } || break
-    }
-done
+    new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
+    game=$new_game
+    no_moves=0
+    while true; do
+	render_array $game
+	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
+	read -p "$player Enter move: " move
+	game=$(make_move $game $player $move);
+	no_moves=$((no_moves+1))
+	result=$(check_game $game)
+	[ -z $result ] || { clear; render_array $game ; echo $result won! ;
+			    read -p "do you want to play again?[Y/N]" restart;
+			    [ $restart == 'Y' ] && { echo restarting game!;
+						     game=$new_game;
+						     no_moves=0; } || break
+	}
+    done
 }
 
 printf "
