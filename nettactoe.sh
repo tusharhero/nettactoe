@@ -146,7 +146,7 @@ clear
 read -p "Do you want to connect to an existing server[Y/N]:" mode
 
 case "$mode" in
-    server ) server ;;
-    client ) echo "Client has not been implemented." ;;
+    [Y,y]* ) server ;;
+    [N,n]* ) echo "Client has not been implemented." ;;
     * ) echo "I don't know what mode you are talking about." ;;
 esac
