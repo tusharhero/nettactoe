@@ -119,6 +119,13 @@ function server {
     while true; do
 	render_array $game
 	echo "$game" >&"${SERVER[1]}"
+	result=$(check_game $game)
+	[ -z $result ] || { clear; render_array $game ; echo $result won! ;
+			    read -p "do you want to play again?[Y/N]" restart;
+			    { [ "$restart" == 'Y' ]; } && { echo restarting game!;
+						     game=$new_game;
+						     no_moves=0; } || return 0;
+	}
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
 	if [ "$player" = "⭕" ]; then
 	    read -p "$player Enter move: " move
@@ -128,13 +135,6 @@ function server {
 	    read -r game <&"${SERVER[0]}"
 	fi
 	no_moves=$((no_moves+1))
-	result=$(check_game $game)
-	[ -z $result ] || { clear; render_array $game ; echo $result won! ;
-			    read -p "do you want to play again?[Y/N]" restart;
-			    [ $restart == 'Y' ] && { echo restarting game!;
-						     game=$new_game;
-						     no_moves=0; } || break
-	}
     done
 }
 
@@ -144,6 +144,13 @@ function client {
     while true; do
 	read -r game <&"${CLIENT[0]}"
 	render_array $game
+	result=$(check_game $game)
+	[ -z $result ] || { clear; render_array $game ; echo $result won! ;
+			    read -p "do you want to play again?[Y/N]" restart;
+			    { [ "$restart" == 'Y' ]; } && { echo restarting game!;
+						     game=$new_game;
+						     no_moves=0; } || return 0;
+	}
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
 	if [ "$player" = "❌" ]; then
 	    read -p "$player Enter move: " move
