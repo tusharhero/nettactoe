@@ -123,6 +123,7 @@ function server {
 	if [ "$player" = "⭕" ]; then
 	    read -p "$player Enter move: " move
 	else
+	    echo "Waiting for ❌ to make a move"
 	    read -r move <&"${SERVER[0]}"
 	fi
 	echo $move
@@ -148,6 +149,8 @@ function client {
 	if [ "$player" = "❌" ]; then
 	    read -p "$player Enter move: " move
 	    echo $move >&"${CLIENT[1]}"
+	else
+	    echo "Waiting for ⭕ to make a move"
 	fi
 	no_moves=$((no_moves+1))
     done
