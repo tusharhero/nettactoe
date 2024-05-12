@@ -118,7 +118,7 @@ function server {
     no_moves=0
     while true; do
 	render_array $game
-	render_array $game >&"${SERVER[1]}"
+	echo "$game" >&"${SERVER[1]}"
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
 	if [ "$player" = "⭕" ]; then
 	    read -p "$player Enter move: " move
@@ -142,8 +142,8 @@ function client {
     coproc CLIENT { nc localhost 4444; }
     no_moves=0
     while true; do
-	read -r rendered_game <&"${CLIENT[0]}"
-	echo $rendered_game
+	read -r game <&"${CLIENT[0]}"
+	render_array $game
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
 	if [ "$player" = "❌" ]; then
 	    read -p "$player Enter move: " move
