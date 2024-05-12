@@ -122,12 +122,11 @@ function server {
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
 	if [ "$player" = "⭕" ]; then
 	    read -p "$player Enter move: " move
+	    game=$(make_move $game $player $move);
 	else
 	    echo "Waiting for ❌ to make a move"
-	    read -r move <&"${SERVER[0]}"
+	    read -r game <&"${SERVER[0]}"
 	fi
-	echo $move
-	game=$(make_move $game $player $move);
 	no_moves=$((no_moves+1))
 	result=$(check_game $game)
 	[ -z $result ] || { clear; render_array $game ; echo $result won! ;
@@ -148,7 +147,8 @@ function client {
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
 	if [ "$player" = "❌" ]; then
 	    read -p "$player Enter move: " move
-	    echo $move >&"${CLIENT[1]}"
+	    game=$(make_move $game $player $move);
+	    echo $game >&"${CLIENT[1]}"
 	else
 	    echo "Waiting for ⭕ to make a move"
 	fi
