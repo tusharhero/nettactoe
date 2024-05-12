@@ -116,9 +116,7 @@ function server {
     new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
     game=$new_game
     no_moves=0
-    read -r handshake <&"${SERVER[0]}"
-    printf $handshake
-    while $handshake; do
+    while true; do
 	render_array $game
 	render_array $game >&"${SERVER[1]}"
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
@@ -143,7 +141,6 @@ function server {
 function client {
     coproc CLIENT { nc localhost 4444; }
     no_moves=0
-    echo true >&"${CLIENT[1]}"
     while true; do
 	read -r rendered_game <&"${CLIENT[0]}"
 	echo $rendered_game
