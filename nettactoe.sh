@@ -112,13 +112,22 @@ function make_move {
 
 
 function server {
+    coproc SERVER { nc -l -p 4444; }
     new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
     game=$new_game
     no_moves=0
-    while true; do
+    read -r handshake <&"${SERVER[0]}"
+    printf $handshake
+    while $handshake; do
 	render_array $game
+	render_array $game >&"${SERVER[1]}"
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
-	read -p "$player Enter move: " move
+	if [ "$player" = "⭕" ]; then
+	    read -p "$player Enter move: " move
+	else
+	    read -r move <&"${SERVER[0]}"
+	fi
+	echo $move
 	game=$(make_move $game $player $move);
 	no_moves=$((no_moves+1))
 	result=$(check_game $game)
@@ -128,6 +137,22 @@ function server {
 						     game=$new_game;
 						     no_moves=0; } || break
 	}
+    done
+}
+
+function client {
+    coproc CLIENT { nc localhost 4444; }
+    no_moves=0
+    echo true >&"${CLIENT[1]}"
+    while true; do
+	read -r rendered_game <&"${CLIENT[0]}"
+	echo $rendered_game
+	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
+	if [ "$player" = "❌" ]; then
+	    read -p "$player Enter move: " move
+	fi
+	echo $move >&"${CLIENT[1]}"
+	no_moves=$((no_moves+1))
     done
 }
 
@@ -146,7 +171,7 @@ clear
 read -p "Do you want to connect to an existing server[Y/N]:" mode
 
 case "$mode" in
-    [Y,y]* ) echo "Client has not been implemented."  ;;
+    [Y,y]* ) client ;;
     [N,n]* ) server ;;
     * ) echo "I don't know what mode you are talking about." ;;
 esac
