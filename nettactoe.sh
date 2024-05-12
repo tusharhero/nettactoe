@@ -147,8 +147,8 @@ function client {
 	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
 	if [ "$player" = "❌" ]; then
 	    read -p "$player Enter move: " move
+	    echo $move >&"${CLIENT[1]}"
 	fi
-	echo $move >&"${CLIENT[1]}"
 	no_moves=$((no_moves+1))
     done
 }
