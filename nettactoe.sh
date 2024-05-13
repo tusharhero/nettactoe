@@ -175,20 +175,23 @@ function client {
     done
 }
 
-printf "
+function splash_screen {
+    printf "
 ███    ██ ███████ ████████ ████████  █████   ██████ ████████  ██████  ███████ 
 ████   ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
 ██ ██  ██ █████      ██       ██    ███████ ██         ██    ██    ██ █████   
 ██  ██ ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
 ██   ████ ███████    ██       ██    ██   ██  ██████    ██     ██████  ███████ 
 "                                                                              
-printf "Copyright (C) 2024 tusharhero\n\n"
-printf "Hit return to start\n"
-read
-clear
+    printf "Copyright (C) 2024 tusharhero\n\n"
+    printf "Hit return to start\n"
+    read
+    clear
+}
+
+splash_screen
 printf "Start a server (client can connect to it): server\nConnect to a server: client\n"
 read -p ": " mode
-
 case "$mode" in
     [C,c]* ) client ;;
     [S,s]* ) server ;;
