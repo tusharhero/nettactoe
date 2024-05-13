@@ -128,6 +128,9 @@ function restart_game {
 
 function server {
     coproc SERVER { nc -l -p 4444; }
+    echo "Waiting for a client to join.."
+    read <&"${SERVER[0]}"
+    echo "client has joined!"
     new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
     game=$new_game
     no_moves=0
@@ -150,6 +153,7 @@ function server {
 
 function client {
     coproc CLIENT { nc localhost 4444; }
+    echo "Connected" >&"${CLIENT[1]}"
     no_moves=0
     while true; do
 	read -r game <&"${CLIENT[0]}"
