@@ -128,7 +128,7 @@ function restart_game {
 
 function server {
     read -p "Enter the port to use for the nettactoe server: " -i "4444" -e server_port
-    coproc SERVER { nc -l -p $sever_port ; }
+    coproc SERVER { nc -l -p $server_port ; }
     echo "Waiting for a client to join.."
     read <&"${SERVER[0]}"
     echo "client has joined!"
