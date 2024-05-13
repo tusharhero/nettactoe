@@ -15,9 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-function clear {
-    printf '\033c'
-}
+if ! command -v clear >/dev/null 2>&1
+then
+    function clear {
+	printf '\033c'
+    }
+fi
 
 function max {
   [ $1 -gt $2 ] && echo $1 || echo $2
