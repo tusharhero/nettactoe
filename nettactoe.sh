@@ -136,6 +136,7 @@ function server {
     game=$new_game
     no_moves=0
     while true; do
+	clear
 	render_array $game
 	echo "$game" >&"${SERVER[1]}"
 	result=$(check_game $game)
@@ -160,6 +161,7 @@ function client {
     no_moves=0
     while true; do
 	read -r game <&"${CLIENT[0]}"
+	clear
 	render_array $game
 	result=$(check_game $game)
 	restart_game
