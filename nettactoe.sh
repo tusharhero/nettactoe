@@ -183,11 +183,11 @@ printf "Copyright (C) 2024 tusharhero\n\n"
 printf "Hit return to start\n"
 read
 clear
-
-read -p "Do you want to connect to an existing server[Y/N]:" mode
+printf "Start a server (client can connect to it): server\nConnect to a server: client\n"
+read -p ": " mode
 
 case "$mode" in
-    [Y,y]* ) client ;;
-    [N,n]* ) server ;;
+    [C,c]* ) client ;;
+    [S,s]* ) server ;;
     * ) echo "I don't know what mode you are talking about." ;;
 esac
