@@ -152,7 +152,9 @@ function server {
 }
 
 function client {
-    coproc CLIENT { nc localhost 4444; }
+    read -p "Enter the IP address of the server: " -i "localhost" -e server_ip
+    read -p "Enter the port of nettactoe server: " -i "4444" -e server_port
+    coproc CLIENT { nc $server_ip $server_port; }
     echo "Connected" >&"${CLIENT[1]}"
     no_moves=0
     while true; do
