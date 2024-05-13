@@ -9,6 +9,9 @@
 ██   ████ ███████    ██       ██    ██   ██  ██████    ██     ██████  ███████ 
 #+end_src
 
+
+[[https://tusharhero.github.io/video/nettactoe.mp4]]
+
 This is a multiplayer Tic Tac Toe game which uses netcat for
 networking and is written in Bash.
 
