@@ -110,6 +110,68 @@ function make_move {
     fi
 }
 
+function restart_game {
+    if ! [ -z $result ]; then
+	clear
+	render_array $game
+	echo $result won!
+	read -p "do you want to play again?[Y/N]" restart
+	if [ "$restart" == 'Y' ]; then
+	    echo restarting game!
+	    game=$new_game
+	    no_moves=0
+	else
+	    exit
+	fi
+    fi
+}
+
+function server {
+    coproc SERVER { nc -l -p 4444; }
+    echo "Waiting for a client to join.."
+    read <&"${SERVER[0]}"
+    echo "client has joined!"
+    new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
+    game=$new_game
+    no_moves=0
+    while true; do
+	render_array $game
+	echo "$game" >&"${SERVER[1]}"
+	result=$(check_game $game)
+	restart_game
+	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
+	if [ "$player" = "⭕" ]; then
+	    read -p "$player Enter move: " move
+	    game=$(make_move $game $player $move);
+	else
+	    echo "Waiting for ❌ to make a move"
+	    read -r game <&"${SERVER[0]}"
+	fi
+	no_moves=$((no_moves+1))
+    done
+}
+
+function client {
+    coproc CLIENT { nc localhost 4444; }
+    echo "Connected" >&"${CLIENT[1]}"
+    no_moves=0
+    while true; do
+	read -r game <&"${CLIENT[0]}"
+	render_array $game
+	result=$(check_game $game)
+	restart_game
+	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
+	if [ "$player" = "❌" ]; then
+	    read -p "$player Enter move: " move
+	    game=$(make_move $game $player $move);
+	    echo $game >&"${CLIENT[1]}"
+	else
+	    echo "Waiting for ⭕ to make a move"
+	fi
+	no_moves=$((no_moves+1))
+    done
+}
+
 printf "
 ███    ██ ███████ ████████ ████████  █████   ██████ ████████  ██████  ███████ 
 ████   ██ ██         ██       ██    ██   ██ ██         ██    ██    ██ ██      
@@ -122,20 +184,10 @@ printf "Hit return to start\n"
 read
 clear
 
-new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
-game=$new_game
-no_moves=0
-while true; do
-    render_array $game
-    player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
-    read -p "$player Enter move: " move
-    game=$(make_move $game $player $move);
-    no_moves=$((no_moves+1))
-    result=$(check_game $game)
-    [ -z $result ] || { clear; render_array $game ; echo $result won! ;
-			read -p "do you want to play again?[Y/N]" restart;
-			[ $restart == 'Y' ] && { echo restarting game!;
-						 game=$new_game;
-						 no_moves=0; } || break
-    }
-done
+read -p "Do you want to connect to an existing server[Y/N]:" mode
+
+case "$mode" in
+    [Y,y]* ) client ;;
+    [N,n]* ) server ;;
+    * ) echo "I don't know what mode you are talking about." ;;
+esac
