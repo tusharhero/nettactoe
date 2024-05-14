@@ -9,8 +9,12 @@
 ██   ████ ███████    ██       ██    ██   ██  ██████    ██     ██████  ███████ 
 #+end_src
 
+A multiplayer Tic Tac Toe game which uses netcat for
+networking, written in Bash. It is my submission to [[https://gnulinuxindia.sh/blog/shell-script-show-case-may-24/][GLI May 24 challenge]].
 
+* Demonstration
 [[https://tusharhero.github.io/video/nettactoe.gif]]
+* Installation
+It is available on my [[https://codeberg.org/tusharhero/thgsc][Guix channel]]. Or you can just download the
+script directly.
 
-This is a multiplayer Tic Tac Toe game which uses netcat for
-networking and is written in Bash.
