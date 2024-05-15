@@ -41,11 +41,11 @@ function clamp {
 }
 
 function get_row {
-  echo $1 | cut -d";" -f $2 -
+    cut -d';' -f "$2" <<< "$1"
 }
 
 function get_cell {
-  echo $1 | cut -d"," -f $2 -
+    cut -d',' -f "$2" <<< "$1"
 }
 
 function get_array_element {
@@ -72,7 +72,7 @@ function set_array_element {
 }
 
 function render_array {
-    printf "$(echo $1 | sed -e 's/,//g' -e 's/;/\\n/g')\n"
+    printf "$(sed -e 's/,//g' -e 's/;/\\n/g' <<< "$1")\n"
 }
 
 function check_game {
@@ -103,32 +103,38 @@ function make_move {
     local game=$1
     local player=$2
     local move=$3
-    local y=$(printf $move | cut -d"," -f 1 -)
-    y=$(clamp $y 1 3)
-    local x=$(printf $move | cut -d"," -f 2 -)
-    x=$(clamp $x 1 3)
+
+    local y
+    y=$(cut -d"," -f 1 <<< "$move")
+    y=$(clamp "$y" 1 3)
+
+    local x
+    x=$(cut -d"," -f 2 <<< "$move")
+    x=$(clamp "$x" 1 3)
+
     block="$(get_array_element "$game" "$y" "$x")"
     if [ "$block" == "⭕" ] || [ "$block" == "❌" ]; then
 	read -rp "That block is preoccupied, please enter new move: " move
 	make_move "$game" "$player" "$move"
     else
-      echo $(set_array_element $game $y $x $player);
+	set_array_element "$game" "$y" "$x" "$player"
     fi
 }
 
 function restart_game {
-    if ! [ -z $result ]; then
-	read -p "do you want to play again?[Y/N]" restart
-	if [ "$restart" == 'Y' ]; then
-	    echo restarting game!
-	    game=$new_game
-	    no_moves=0
-	else
-	    exit
-	fi
+
+    [ -z "$result" ] && return 0
     clear
     render_array "$game"
     echo "$result" won!
+    read -rp 'Do you want to play again? [y/N] ' restart
+
+    if [ "$restart" == 'Y' ] || [ "$restart" == 'y' ]; then
+	echo 'restarting game!'
+	game="$new_game"
+	no_moves=0
+    else
+	exit
     fi
 }
 
@@ -206,8 +212,13 @@ function splash_screen {
 }
 
 splash_screen
-printf "Start a server (client can connect to it): server\nConnect to a server: client\n"
-read -p ": " mode
+
+cat <<EOL
+Start a nettactoe server (client can connect to it): server
+Connect to a nettactoe server: client
+EOL
+
+read -rp ": " mode
 case "$mode" in
     [C,c]* ) client ;;
     [S,s]* ) server ;;
