@@ -23,21 +23,21 @@ then
 fi
 
 function max {
-  [ $1 -gt $2 ] && echo $1 || echo $2
+    [ "$1" -gt "$2" ] && echo "$1" || echo "$2"
 }
 
 function min {
-  [ $1 -lt $2 ] && echo $1 || echo $2
+    [ "$1" -lt "$2" ] && echo "$1" || echo "$2"
 }
 
 function clamp {
-    local value=$1
-    local min_value=$2
-    local max_value=$3
-    local firstValue=$(max $value $min_value)
-    local returnValue=$(min $firstValue $max_value)
-
-    echo "$returnValue"
+    if [ "$1" -lt "$2" ]; then
+	echo "$2"
+    elif [ "$1" -gt "$3" ]; then
+	echo "$3"
+    else
+	echo "$1"
+    fi
 }
 
 function get_row {
@@ -52,8 +52,10 @@ function get_array_element {
     local array=$1
     local y=$2
     local x=$3
-    local row=$(get_row "$array" "$y")
-    local element=$(get_cell "$row" "$x")
+    local row
+    row=$(get_row "$array" "$y")
+    local element
+    element=$(get_cell "$row" "$x")
     echo "$element"
 }
 
@@ -62,10 +64,11 @@ function set_array_element {
     local y=$2
     local x=$3
     local newvalue=$4
-    local row=$(get_row "$array" "$y")
-    row=$(printf "$row" | awk -F "," -v newvalue="$newvalue" -v x="$x" 'BEGIN{FS=OFS=","} {$x=newvalue; print}' )
-    array=$(printf "$array" | awk -F ";" -v newvalue="$row" -v y="$y" 'BEGIN{FS=OFS=";"} {$y=newvalue; print}')
-    echo $array
+    local row
+    row=$(get_row "$array" "$y")
+    row=$(awk -F "," -v newvalue="$newvalue" -v x="$x" 'BEGIN{FS=OFS=","} {$x=newvalue; print}' <<< "$row" )
+    array=$(awk -F ";" -v newvalue="$row" -v y="$y" 'BEGIN{FS=OFS=";"} {$y=newvalue; print}' <<< "$array")
+    echo "$array"
 }
 
 function render_array {
@@ -75,25 +78,25 @@ function render_array {
 function check_game {
     local array=$1
     for y in {1..3}; do
-	[ "$(get_array_element $array $y 1)" == "⬛️" ] || \
-	{ [ "$(get_array_element $array $y 1)" == "$(get_array_element $array $y 2)" ] && \
-	    [ "$(get_array_element $array $y 2)" == "$(get_array_element $array $y 3)" ] && \
-	    { printf "$(get_array_element $array $y 1)"; return 0; } }
+	[ "$(get_array_element "$array" "$y" 1)" == "⬛️" ] || \
+	    { [ "$(get_array_element "$array" "$y" 1)" == "$(get_array_element "$array" "$y" 2)" ] && \
+		  [ "$(get_array_element "$array" "$y" 2)" == "$(get_array_element "$array" "$y" 3)" ] && \
+		  { printf '%s' "$(get_array_element "$array" "$y" 1)"; return 0; } }
     done
     for x in {1..3}; do
-	[ "$(get_array_element $array 1 $x)" == "⬛️" ] || \
-	{ [ "$(get_array_element $array 1 $x)" == "$(get_array_element $array 2 $x)" ] && \
-	    [ "$(get_array_element $array 2 $x)" == "$(get_array_element $array 3 $x)" ] && \
-	    { printf "$(get_array_element $array 1 $x)"; return 0; } }
+	[ "$(get_array_element "$array" 1 "$x")" == "⬛️" ] || \
+	    { [ "$(get_array_element "$array" 1 "$x")" == "$(get_array_element "$array" 2 "$x")" ] && \
+		  [ "$(get_array_element "$array" 2 "$x")" == "$(get_array_element "$array" 3 "$x")" ] && \
+		  { printf '%s' "$(get_array_element "$array" 1 "$x")"; return 0; } }
     done
-    [ "$(get_array_element $array 2 2)" == "⬛️" ] || \
-    { { [ "$(get_array_element $array 1 1)" == "$(get_array_element $array 2 2)" ] && \
-	[ "$(get_array_element $array 2 2)" == "$(get_array_element $array 3 3)" ]; } || \
-	   { [ "$(get_array_element $array 3 1)" == "$(get_array_element $array 2 2)" ] && \
-		[ "$(get_array_element $array 2 2)" == "$(get_array_element $array 1 3)" ]; } && \
-		{ printf "$(get_array_element $array 2 2)"; return 0; }; }
+    [ "$(get_array_element "$array" 2 2)" == "⬛️" ] || \
+	{ { [ "$(get_array_element "$array" 1 1)" == "$(get_array_element "$array" 2 2)" ] && \
+		[ "$(get_array_element "$array" 2 2)" == "$(get_array_element "$array" 3 3)" ]; } || \
+	      { [ "$(get_array_element "$array" 3 1)" == "$(get_array_element "$array" 2 2)" ] && \
+		    [ "$(get_array_element "$array" 2 2)" == "$(get_array_element "$array" 1 3)" ]; } && \
+		  { printf '%s' "$(get_array_element "$array" 2 2)"; return 0; }; }
 
-    [ $(printf $array | sed 's/[^⬛]//g' | wc --chars) == 0 ] && { printf 'no one'; return 0;}
+    [ "$(printf '%s' "$array" | sed 's/[^⬛]//g' | wc --chars)" == '0' ] && { printf 'no one'; return 0;}
 }
 
 function make_move {
@@ -104,10 +107,10 @@ function make_move {
     y=$(clamp $y 1 3)
     local x=$(printf $move | cut -d"," -f 2 -)
     x=$(clamp $x 1 3)
-    block="$(get_array_element $game $y $x)"
+    block="$(get_array_element "$game" "$y" "$x")"
     if [ "$block" == "⭕" ] || [ "$block" == "❌" ]; then
-      read -p "That block is preoccupied, please enter new move: " move
-      make_move $game $player $move
+	read -rp "That block is preoccupied, please enter new move: " move
+	make_move "$game" "$player" "$move"
     else
       echo $(set_array_element $game $y $x $player);
     fi
@@ -115,9 +118,6 @@ function make_move {
 
 function restart_game {
     if ! [ -z $result ]; then
-	clear
-	render_array $game
-	echo $result won!
 	read -p "do you want to play again?[Y/N]" restart
 	if [ "$restart" == 'Y' ]; then
 	    echo restarting game!
@@ -126,6 +126,9 @@ function restart_game {
 	else
 	    exit
 	fi
+    clear
+    render_array "$game"
+    echo "$result" won!
     fi
 }
 
@@ -136,23 +139,27 @@ function server {
     read <&"${SERVER[0]}"
     echo "client has joined!"
     new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
-    game=$new_game
+    game="$new_game"
     no_moves=0
+
     while true; do
 	clear
-	render_array $game
+	render_array "$game"
 	echo "$game" >&"${SERVER[1]}"
-	result=$(check_game $game)
+
+	result=$(check_game "$game")
 	restart_game
-	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
+
+	player=$( ((no_moves % 2 == 0)) && echo "⭕" || echo "❌" )
 	if [ "$player" = "⭕" ]; then
-	    read -p "$player Enter move: " move
-	    game=$(make_move $game $player $move);
+	    read -rp "$player Enter move: " move
+	    game=$(make_move "$game" "$player" "$move");
 	else
 	    echo "Waiting for ❌ to make a move"
 	    read -r game <&"${SERVER[0]}"
 	fi
-	no_moves=$((no_moves+1))
+
+	no_moves=$((no_moves + 1))
     done
 }
 
@@ -162,21 +169,25 @@ function client {
     coproc CLIENT { nc $server_ip $server_port; }
     echo "Connected" >&"${CLIENT[1]}"
     no_moves=0
+
     while true; do
 	read -r game <&"${CLIENT[0]}"
 	clear
-	render_array $game
-	result=$(check_game $game)
+	render_array "$game"
+
+	result=$(check_game "$game")
 	restart_game
-	player=$([ "$(( $no_moves % 2))" == 0 ] && echo "⭕" || echo "❌")
+
+	player=$( ((no_moves % 2 == 0)) && echo "⭕" || echo "❌" )
 	if [ "$player" = "❌" ]; then
-	    read -p "$player Enter move: " move
-	    game=$(make_move $game $player $move);
-	    echo $game >&"${CLIENT[1]}"
+	    read -rp "$player Enter move: " move
+	    game=$(make_move "$game" "$player" "$move");
+	    echo "$game" >&"${CLIENT[1]}"
 	else
 	    echo "Waiting for ⭕ to make a move"
 	fi
-	no_moves=$((no_moves+1))
+
+	no_moves=$((no_moves + 1))
     done
 }
 
@@ -190,7 +201,7 @@ function splash_screen {
 "                                                                              
     printf "Copyright (C) 2024 tusharhero\n\n"
     printf "Hit return to start\n"
-    read
+    read -r
     clear
 }
 
