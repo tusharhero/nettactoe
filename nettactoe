@@ -139,11 +139,29 @@ function restart_game {
 }
 
 function server {
-    read -p "Enter the port to use for the nettactoe server: " -i "4444" -e server_port
-    coproc SERVER { nc -l -p $server_port ; }
+    read -rp "Enter the IP address of the nettactoe server (enter self to host it yourself): " -i "self" -e server_ip
+    read -rp "Enter the port of nettactoe server (or the port to use for the nettactoe server): " -i "4444" -e server_port
+
+    if [ "$server_ip" = 'self' ]; then
+        coproc SERVER { stdbuf -oL nc -l -p $server_port ; }
+
+        # Read the dummy secret phrase sent by the client.
+        # It isn't used because there is no intermediate relay server.
+        read <&"${SERVER[0]}"
+    else
+        read -rp "Enter the shared secret phrase: " -e secret
+        coproc SERVER { stdbuf -oL nc "$server_ip" "$server_port"; }
+        sleep 3
+        stdbuf -oL echo "$secret" >&"${SERVER[1]}"
+    fi
+
+    # Read the connected message from client and send acknowledgement.
     echo "Waiting for a client to join.."
     read <&"${SERVER[0]}"
-    echo "client has joined!"
+
+    echo "Client has joined!"
+    stdbuf -oL echo 'You joined' >&"${SERVER[1]}"
+
     new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
     game="$new_game"
     no_moves=0
@@ -170,10 +188,18 @@ function server {
 }
 
 function client {
-    read -p "Enter the IP address of the server: " -i "localhost" -e server_ip
-    read -p "Enter the port of nettactoe server: " -i "4444" -e server_port
-    coproc CLIENT { nc $server_ip $server_port; }
-    echo "Connected" >&"${CLIENT[1]}"
+    read -rp "Enter the IP address of the nettactoe server: " -i "localhost" -e server_ip
+    read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
+    read -rp "Enter the shared secret phrase: " -e secret
+
+    coproc CLIENT { stdbuf -oL nc "$server_ip" "$server_port"; }
+    sleep 3
+    stdbuf -oL echo "$secret" >&"${CLIENT[1]}"
+
+    # Send the connected message and receive acknowledgement.
+    stdbuf -oL echo "Connected" >&"${CLIENT[1]}"
+    read -r <&"${CLIENT[0]}"
+
     no_moves=0
 
     while true; do
