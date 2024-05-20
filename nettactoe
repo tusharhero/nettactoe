@@ -32,11 +32,11 @@ function min {
 
 function clamp {
     if [ "$1" -lt "$2" ]; then
-	echo "$2"
+        echo "$2"
     elif [ "$1" -gt "$3" ]; then
-	echo "$3"
+        echo "$3"
     else
-	echo "$1"
+        echo "$1"
     fi
 }
 
@@ -122,78 +122,100 @@ function make_move {
 }
 
 function restart_game {
-
     [ -z "$result" ] && return 0
+
     clear
     render_array "$game"
     echo "$result" won!
+
     read -rp 'Do you want to play again? [y/N] ' restart
 
     if [ "$restart" == 'Y' ] || [ "$restart" == 'y' ]; then
-	echo 'restarting game!'
-	game="$new_game"
-	no_moves=0
+        echo 'Restarting game!'
+        game="$NEW_GAME"
+        toss
     else
-	exit
+        exit
+    fi
+}
+
+function toss {
+    if [ "$player_no" -eq 0 ]; then
+        move_no=$((RANDOM % 2))
+        echo "$move_no" >&"${CONN[1]}"
+    else
+        read -r move_no <&"${CONN[0]}"
     fi
 }
 
 function server {
-    read -p "Enter the port to use for the nettactoe server: " -i "4444" -e server_port
-    coproc SERVER { nc -l -p $server_port ; }
-    echo "Waiting for a client to join.."
-    read <&"${SERVER[0]}"
-    echo "client has joined!"
-    new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
-    game="$new_game"
-    no_moves=0
+    read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
+    coproc CONN { nc -l -p "$server_port"; }
 
-    while true; do
-	clear
-	render_array "$game"
-	echo "$game" >&"${SERVER[1]}"
+    # Read the dummy secret phrase sent by the client.
+    # It isn't used because there is no intermediate relay server.
+    echo 'Waiting for the other player to join...'
+    read -r <&"${CONN[0]}"
 
-	result=$(check_game "$game")
-	restart_game
+    # Make the other player Player 0.
+    echo '0' >&"${CONN[1]}"
+    player_no=1
 
-	player=$( ((no_moves % 2 == 0)) && echo "⭕" || echo "❌" )
-	if [ "$player" = "⭕" ]; then
-	    read -rp "$player Enter move: " move
-	    game=$(make_move "$game" "$player" "$move");
-	else
-	    echo "Waiting for ❌ to make a move"
-	    read -r game <&"${SERVER[0]}"
-	fi
-
-	no_moves=$((no_moves + 1))
-    done
+    client nope
 }
 
 function client {
-    read -p "Enter the IP address of the server: " -i "localhost" -e server_ip
-    read -p "Enter the port of nettactoe server: " -i "4444" -e server_port
-    coproc CLIENT { nc $server_ip $server_port; }
-    echo "Connected" >&"${CLIENT[1]}"
-    no_moves=0
+    if [ "$#" = 0 ]; then
+        read -rp "Enter the IP address of the nettactoe server: " -i "localhost" -e server_ip
+        read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
+        read -rp "Enter the shared secret phrase: " -e secret
+
+        coproc CONN { nc "$server_ip" "$server_port"; }
+
+        echo 'Connecting to the server...'
+        sleep 3
+
+        echo "$secret" >&"${CONN[1]}"
+
+        # Get the player_no. Player 0 is O and 1 is X.
+        read -r player_no <&"${CONN[0]}"
+    fi
+
+    # Prevent early start of player 0 by synchronizing both the players.
+    if [ "$player_no" -eq 0 ]; then
+        echo 'Waiting for the other player to join...'
+        read -r <&"${CONN[0]}"
+
+        echo 'ACK' >&"${CONN[1]}"
+    else
+        echo 'ACK' >&"${CONN[1]}"
+
+        echo 'Waiting for the other player to join...'
+        read -r <&"${CONN[0]}"
+    fi
+
+    toss
+    game="$NEW_GAME"
 
     while true; do
-	read -r game <&"${CLIENT[0]}"
-	clear
-	render_array "$game"
+        result=$(check_game "$game")
+        restart_game
 
-	result=$(check_game "$game")
-	restart_game
+        clear
+        render_array "$game"
 
-	player=$( ((no_moves % 2 == 0)) && echo "⭕" || echo "❌" )
-	if [ "$player" = "❌" ]; then
-	    read -rp "$player Enter move: " move
-	    game=$(make_move "$game" "$player" "$move");
-	    echo "$game" >&"${CLIENT[1]}"
-	else
-	    echo "Waiting for ⭕ to make a move"
-	fi
+        player=$( ((move_no % 2 == 0)) && echo "⭕" || echo "❌" )
 
-	no_moves=$((no_moves + 1))
+        if [ $((move_no % 2)) = "$player_no" ]; then
+            read -rp "$player Enter move: " move
+            game=$(make_move "$game" "$player" "$move");
+            echo "$game" >&"${CONN[1]}"
+        else
+            echo "Waiting for $player to make a move"
+            read -r game <&"${CONN[0]}"
+        fi
+
+        move_no=$((move_no + 1))
     done
 }
 
@@ -210,6 +232,8 @@ function splash_screen {
     read -r
     clear
 }
+
+NEW_GAME="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
 
 splash_screen
 

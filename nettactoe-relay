@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# mitm.sh - A general purpose intermediary/relay server for communication between two peers.
+# Copyright (C) 2024 virinci
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+if [ -z "$MITM_MODE" ] && [ -n "$1" ]; then
+	socat TCP-LISTEN:"$1",fork,reuseaddr,max-children=100 SYSTEM:"MITM_MODE=relay $0 $*"
+elif [ "$MITM_MODE" = 'relay' ]; then
+	secret=$(head -n 1)
+	[ -n "$secret" ] || exit 1
+
+	identifier=$(echo "$secret" | sha256sum | cut -d ' ' -f 1)
+	mkfifo "/tmp/${identifier}-0.fifo" "/tmp/${identifier}-1.fifo" 2> /dev/null
+
+	printf "Secret: '%s'\tFIFO: '%s'\n" "$secret" "$identifier" >&2
+
+	# set -x
+	flock     -x -n "/tmp/${identifier}-0.lock" -c "echo 0; cat /tmp/${identifier}-1.fifo & cat > /tmp/${identifier}-0.fifo; true" ||
+		flock -x -n "/tmp/${identifier}-1.lock" -c "echo 1; cat /tmp/${identifier}-0.fifo & cat > /tmp/${identifier}-1.fifo; true" ||
+		exit 1
+else
+	exit 1
+fi
