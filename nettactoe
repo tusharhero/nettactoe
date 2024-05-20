@@ -138,6 +138,15 @@ function restart_game {
     fi
 }
 
+function toss {
+    if [ "$player_no" -eq 0 ]; then
+        move_no=$((RANDOM % 2))
+        stdbuf -oL echo "$move_no" >&"${CONN[1]}"
+    else
+        read -r move_no <&"${CONN[0]}"
+    fi
+}
+
 function server {
     read -rp "Enter the IP address of the nettactoe server (enter self to host it yourself): " -i "self" -e server_ip
     read -rp "Enter the port of nettactoe server (or the port to use for the nettactoe server): " -i "4444" -e server_port
