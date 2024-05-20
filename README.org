@@ -17,4 +17,7 @@ networking, written in Bash. It is my submission to [[https://gnulinuxindia.sh/b
 * Installation
 It is available on my [[https://codeberg.org/tusharhero/thgsc][Guix channel]]. Or you can just download the
 script directly.
+* nettactoe-relay
+The nettactoe-relay script allows you have to a standalone nettactoe
+server running to which other clients may connect. It uses socat.
 
