@@ -21,3 +21,5 @@ script directly.
 The nettactoe-relay script allows you have to a standalone nettactoe
 server running to which other clients may connect. It uses socat.
 
+I run a public instance of this server at =185.109.168.9=, port =4444=.
+
