@@ -12,8 +12,8 @@ elif [ "$MITM_MODE" = 'relay' ]; then
 	printf "Secret: '%s'\tFIFO: '%s'\n" "$secret" "$identifier" >&2
 
 	# set -x
-	flock     -x -n "/tmp/${identifier}-0.lock" -c "cat /tmp/${identifier}-1.fifo & cat > /tmp/${identifier}-0.fifo; true" ||
-		flock -x -n "/tmp/${identifier}-1.lock" -c "cat /tmp/${identifier}-0.fifo & cat > /tmp/${identifier}-1.fifo; true" ||
+	flock     -x -n "/tmp/${identifier}-0.lock" -c "echo 0; cat /tmp/${identifier}-1.fifo & cat > /tmp/${identifier}-0.fifo; true" ||
+		flock -x -n "/tmp/${identifier}-1.lock" -c "echo 1; cat /tmp/${identifier}-0.fifo & cat > /tmp/${identifier}-1.fifo; true" ||
 		exit 1
 else
 	exit 1
