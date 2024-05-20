@@ -154,6 +154,7 @@ function server {
 
     # Read the dummy secret phrase sent by the client.
     # It isn't used because there is no intermediate relay server.
+    echo 'Waiting for the other player to join...'
     read -r <&"${CONN[0]}"
 
     # Make the other player Player 0.
@@ -170,12 +171,27 @@ function client {
         read -rp "Enter the shared secret phrase: " -e secret
 
         coproc CONN { nc "$server_ip" "$server_port"; }
-        # sleep 3
+
+        echo 'Connecting to the server...'
+        sleep 3
 
         echo "$secret" >&"${CONN[1]}"
 
         # Get the player_no. Player 0 is O and 1 is X.
         read -r player_no <&"${CONN[0]}"
+    fi
+
+    # Prevent early start of player 0 by synchronizing both the players.
+    if [ "$player_no" -eq 0 ]; then
+        echo 'Waiting for the other player to join...'
+        read -r <&"${CONN[0]}"
+
+        echo 'ACK' >&"${CONN[1]}"
+    else
+        echo 'ACK' >&"${CONN[1]}"
+
+        echo 'Waiting for the other player to join...'
+        read -r <&"${CONN[0]}"
     fi
 
     toss
