@@ -148,52 +148,18 @@ function toss {
 }
 
 function server {
-    read -rp "Enter the IP address of the nettactoe server (enter self to host it yourself): " -i "self" -e server_ip
-    read -rp "Enter the port of nettactoe server (or the port to use for the nettactoe server): " -i "4444" -e server_port
+    read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
+    coproc CONN { stdbuf -oL nc -l -p "$server_port"; }
 
-    if [ "$server_ip" = 'self' ]; then
-        coproc SERVER { stdbuf -oL nc -l -p $server_port ; }
+    # Read the dummy secret phrase sent by the client.
+    # It isn't used because there is no intermediate relay server.
+    read -r <&"${CONN[0]}"
 
-        # Read the dummy secret phrase sent by the client.
-        # It isn't used because there is no intermediate relay server.
-        read <&"${SERVER[0]}"
-    else
-        read -rp "Enter the shared secret phrase: " -e secret
-        coproc SERVER { stdbuf -oL nc "$server_ip" "$server_port"; }
-        sleep 3
-        stdbuf -oL echo "$secret" >&"${SERVER[1]}"
-    fi
+    # Make the other player Player 0.
+    stdbuf -oL echo '0' >&"${CONN[1]}"
+    player_no=1
 
-    # Read the connected message from client and send acknowledgement.
-    echo "Waiting for a client to join.."
-    read <&"${SERVER[0]}"
-
-    echo "Client has joined!"
-    stdbuf -oL echo 'You joined' >&"${SERVER[1]}"
-
-    new_game="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
-    game="$new_game"
-    no_moves=0
-
-    while true; do
-        clear
-        render_array "$game"
-        echo "$game" >&"${SERVER[1]}"
-
-        result=$(check_game "$game")
-        restart_game
-
-        player=$( ((no_moves % 2 == 0)) && echo "⭕" || echo "❌" )
-        if [ "$player" = "⭕" ]; then
-            read -rp "$player Enter move: " move
-            game=$(make_move "$game" "$player" "$move");
-        else
-            echo "Waiting for ❌ to make a move"
-            read -r game <&"${SERVER[0]}"
-        fi
-
-        no_moves=$((no_moves + 1))
-    done
+    client nope
 }
 
 function client {
