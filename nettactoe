@@ -188,38 +188,42 @@ function server {
 }
 
 function client {
-    read -rp "Enter the IP address of the nettactoe server: " -i "localhost" -e server_ip
-    read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
-    read -rp "Enter the shared secret phrase: " -e secret
+    if [ "$#" = 0 ]; then
+        read -rp "Enter the IP address of the nettactoe server: " -i "localhost" -e server_ip
+        read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
+        read -rp "Enter the shared secret phrase: " -e secret
 
-    coproc CLIENT { stdbuf -oL nc "$server_ip" "$server_port"; }
-    sleep 3
-    stdbuf -oL echo "$secret" >&"${CLIENT[1]}"
+        coproc CONN { stdbuf -oL nc "$server_ip" "$server_port"; }
+        sleep 3
 
-    # Send the connected message and receive acknowledgement.
-    stdbuf -oL echo "Connected" >&"${CLIENT[1]}"
-    read -r <&"${CLIENT[0]}"
+        stdbuf -oL echo "$secret" >&"${CONN[1]}"
 
-    no_moves=0
+        # Get the player_no. Player 0 is O and 1 is X.
+        read -r player_no <&"${CONN[0]}"
+    fi
+
+    toss
+    game="$NEW_GAME"
 
     while true; do
-        read -r game <&"${CLIENT[0]}"
         clear
         render_array "$game"
 
         result=$(check_game "$game")
         restart_game
 
-        player=$( ((no_moves % 2 == 0)) && echo "⭕" || echo "❌" )
-        if [ "$player" = "❌" ]; then
+        player=$( ((move_no % 2 == 0)) && echo "⭕" || echo "❌" )
+
+        if [ $((move_no % 2)) = "$player_no" ]; then
             read -rp "$player Enter move: " move
             game=$(make_move "$game" "$player" "$move");
-            echo "$game" >&"${CLIENT[1]}"
+            echo "$game" >&"${CONN[1]}"
         else
-            echo "Waiting for ⭕ to make a move"
+            echo "Waiting for $player to make a move"
+            read -r game <&"${CONN[0]}"
         fi
 
-        no_moves=$((no_moves + 1))
+        move_no=$((move_no + 1))
     done
 }
 
@@ -236,6 +240,8 @@ function splash_screen {
     read -r
     clear
 }
+
+NEW_GAME="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
 
 splash_screen
 
