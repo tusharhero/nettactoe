@@ -122,19 +122,20 @@ function make_move {
 }
 
 function restart_game {
-
     [ -z "$result" ] && return 0
+
     clear
     render_array "$game"
     echo "$result" won!
+
     read -rp 'Do you want to play again? [y/N] ' restart
 
     if [ "$restart" == 'Y' ] || [ "$restart" == 'y' ]; then
-	echo 'restarting game!'
-	game="$new_game"
-	no_moves=0
+        echo 'Restarting game!'
+        game="$NEW_GAME"
+        toss
     else
-	exit
+        exit
     fi
 }
 
@@ -181,11 +182,11 @@ function client {
     game="$NEW_GAME"
 
     while true; do
-        clear
-        render_array "$game"
-
         result=$(check_game "$game")
         restart_game
+
+        clear
+        render_array "$game"
 
         player=$( ((move_no % 2 == 0)) && echo "⭕" || echo "❌" )
 
