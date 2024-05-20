@@ -142,7 +142,7 @@ function restart_game {
 function toss {
     if [ "$player_no" -eq 0 ]; then
         move_no=$((RANDOM % 2))
-        stdbuf -oL echo "$move_no" >&"${CONN[1]}"
+        echo "$move_no" >&"${CONN[1]}"
     else
         read -r move_no <&"${CONN[0]}"
     fi
@@ -150,14 +150,14 @@ function toss {
 
 function server {
     read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
-    coproc CONN { stdbuf -oL nc -l -p "$server_port"; }
+    coproc CONN { nc -l -p "$server_port"; }
 
     # Read the dummy secret phrase sent by the client.
     # It isn't used because there is no intermediate relay server.
     read -r <&"${CONN[0]}"
 
     # Make the other player Player 0.
-    stdbuf -oL echo '0' >&"${CONN[1]}"
+    echo '0' >&"${CONN[1]}"
     player_no=1
 
     client nope
@@ -169,10 +169,10 @@ function client {
         read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
         read -rp "Enter the shared secret phrase: " -e secret
 
-        coproc CONN { stdbuf -oL nc "$server_ip" "$server_port"; }
-        sleep 3
+        coproc CONN { nc "$server_ip" "$server_port"; }
+        # sleep 3
 
-        stdbuf -oL echo "$secret" >&"${CONN[1]}"
+        echo "$secret" >&"${CONN[1]}"
 
         # Get the player_no. Player 0 is O and 1 is X.
         read -r player_no <&"${CONN[0]}"
