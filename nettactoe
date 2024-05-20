@@ -152,7 +152,7 @@ function server {
     read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
     coproc CONN { nc -l -p "$server_port"; }
 
-    # Read the dummy secret phrase sent by the client.
+    # Read the dummy roomname sent by the client.
     # It isn't used because there is no intermediate relay server.
     echo 'Waiting for the other player to join...'
     read -r <&"${CONN[0]}"
@@ -168,14 +168,14 @@ function client {
     if [ "$#" = 0 ]; then
         read -rp "Enter the IP address of the nettactoe server: " -i "localhost" -e server_ip
         read -rp "Enter the port of the nettactoe server: " -i "4444" -e server_port
-        read -rp "Enter the shared secret phrase: " -e secret
+        read -rp "Enter the room name: " -e roomname
 
         coproc CONN { nc "$server_ip" "$server_port"; }
 
         echo 'Connecting to the server...'
         sleep 3
 
-        echo "$secret" >&"${CONN[1]}"
+        echo "$roomname" >&"${CONN[1]}"
 
         # Get the player_no. Player 0 is O and 1 is X.
         read -r player_no <&"${CONN[0]}"
