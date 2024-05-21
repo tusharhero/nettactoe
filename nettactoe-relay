@@ -25,7 +25,7 @@ elif [ "$MITM_MODE" = 'relay' ]; then
     identifier=$(echo "$secret" | sha256sum | cut -d ' ' -f 1)
     printf "Client secret: '%s'\tidentifier: '%s' joined\n" "$secret" "$identifier" >&2
 
-    flock     -x -n "/tmp/${identifier}-0.lock" -c "echo 0; unlink /tmp/${identifier}.sock 2>/dev/null; socat -  UNIX-LISTEN:/tmp/${identifier}.sock; true" ||
+    flock     -x -n "/tmp/${identifier}-0.lock" -c "echo 0; socat - UNIX-LISTEN:/tmp/${identifier}.sock,unlink-early; true" ||
         flock -x -n "/tmp/${identifier}-1.lock" -c "echo 1; socat - UNIX-CONNECT:/tmp/${identifier}.sock; true" ||
         exit 1
 else
