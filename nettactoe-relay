@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 if [ -z "$MITM_MODE" ] && [ -n "$1" ]; then
-    socat TCP-LISTEN:"$1",fork,reuseaddr,max-children=100 SYSTEM:"MITM_MODE=relay $0 $*"
+    socat TCP-LISTEN:"$1",fork,reuseaddr,max-children=100 SYSTEM:"MITM_MODE=relay $0"
 elif [ "$MITM_MODE" = 'relay' ]; then
     secret=$(head -n 1)
     [ -n "$secret" ] || exit 1
@@ -25,7 +25,7 @@ elif [ "$MITM_MODE" = 'relay' ]; then
     identifier=$(echo "$secret" | sha256sum | cut -d ' ' -f 1)
     printf "Client secret: '%s'\tidentifier: '%s' joined\n" "$secret" "$identifier" >&2
 
-    flock     -x -n "/tmp/${identifier}-0.lock" -c "echo 0; socat - UNIX-LISTEN:/tmp/${identifier}.sock,unlink-early; true" ||
+    flock     -x -n "/tmp/${identifier}-0.lock" -c "echo 0; socat -  UNIX-LISTEN:/tmp/${identifier}.sock,unlink-early; true" ||
         flock -x -n "/tmp/${identifier}-1.lock" -c "echo 1; socat - UNIX-CONNECT:/tmp/${identifier}.sock; true" ||
         exit 1
 else
