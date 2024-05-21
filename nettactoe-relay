@@ -17,20 +17,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 if [ -z "$MITM_MODE" ] && [ -n "$1" ]; then
-	socat TCP-LISTEN:"$1",fork,reuseaddr,max-children=100 SYSTEM:"MITM_MODE=relay $0 $*"
+    socat TCP-LISTEN:"$1",fork,reuseaddr,max-children=100 SYSTEM:"MITM_MODE=relay $0 $*"
 elif [ "$MITM_MODE" = 'relay' ]; then
-	secret=$(head -n 1)
-	[ -n "$secret" ] || exit 1
+    secret=$(head -n 1)
+    [ -n "$secret" ] || exit 1
 
-	identifier=$(echo "$secret" | sha256sum | cut -d ' ' -f 1)
-	mkfifo "/tmp/${identifier}-0.fifo" "/tmp/${identifier}-1.fifo" 2> /dev/null
+    identifier=$(echo "$secret" | sha256sum | cut -d ' ' -f 1)
+    printf "Secret: '%s'\tFIFO: '%s'\n" "$secret" "$identifier" >&2
 
-	printf "Secret: '%s'\tFIFO: '%s'\n" "$secret" "$identifier" >&2
-
-	# set -x
-	flock     -x -n "/tmp/${identifier}-0.lock" -c "echo 0; cat /tmp/${identifier}-1.fifo & cat > /tmp/${identifier}-0.fifo; true" ||
-		flock -x -n "/tmp/${identifier}-1.lock" -c "echo 1; cat /tmp/${identifier}-0.fifo & cat > /tmp/${identifier}-1.fifo; true" ||
-		exit 1
+    flock     -x -n "/tmp/${identifier}-0.lock" -c "echo 0; socat -  UNIX-LISTEN:/tmp/${identifier}.sock; true" ||
+        flock -x -n "/tmp/${identifier}-1.lock" -c "echo 1; socat - UNIX-CONNECT:/tmp/${identifier}.sock; true" ||
+        exit 1
 else
-	exit 1
+    exit 1
 fi
