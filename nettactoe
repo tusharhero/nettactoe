@@ -233,6 +233,12 @@ function splash_screen {
     clear
 }
 
+function finish {
+    [ -n "${CONN_PID}" ] && kill "${CONN_PID}"
+}
+
+trap finish EXIT INT ABRT KILL TERM
+
 NEW_GAME="⬛,⬛,⬛️;⬛️,⬛️,⬛️;⬛️,⬛️,⬛️"
 
 splash_screen
