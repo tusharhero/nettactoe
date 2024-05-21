@@ -18,7 +18,7 @@
 if ! command -v clear >/dev/null 2>&1
 then
     function clear {
-	printf '\033c'
+        printf '\033c'
     }
 fi
 
@@ -114,10 +114,10 @@ function make_move {
 
     block="$(get_array_element "$game" "$y" "$x")"
     if [ "$block" == "⭕" ] || [ "$block" == "❌" ]; then
-	read -rp "That block is preoccupied, please enter new move: " move
-	make_move "$game" "$player" "$move"
+        read -rp "That block is preoccupied, please enter new move: " move
+        make_move "$game" "$player" "$move"
     else
-	set_array_element "$game" "$y" "$x" "$player"
+        set_array_element "$game" "$y" "$x" "$player"
     fi
 }
 
@@ -173,7 +173,7 @@ function client {
         coproc CONN { nc "$server_ip" "$server_port"; }
 
         echo 'Connecting to the server...'
-        sleep 3
+        # sleep 3
 
         echo "$roomname" >&"${CONN[1]}"
 
