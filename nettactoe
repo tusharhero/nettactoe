@@ -234,7 +234,7 @@ function splash_screen {
 }
 
 function finish {
-    [ -n "${CONN_PID}" ] && kill "${CONN_PID}"
+    [ -n "${CONN_PID}" ] && kill "${CONN_PID}" && kill 0
 }
 
 trap finish EXIT INT ABRT KILL TERM
